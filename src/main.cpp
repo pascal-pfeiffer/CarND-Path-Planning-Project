@@ -142,16 +142,77 @@ int main() {
           }
           
           if (too_close){
-            ref_vel -= 0.224;  // ~5 m/s2
+            ref_vel -= 0.5;
           }
           else{
             if (ref_vel < 49.5){
-              ref_vel += 0.224;  // ~5 m/s2
+              ref_vel += 0.5;
             }
           }
           
           // we should change lanes to get forward faster
           if (check_for_lanechange){
+            
+            // we are in the middle lane
+            if (lane == 1){
+              double range_behind_left = 99999;
+              double range_behind_right = 99999;
+              double range_ahead_left = 99999;
+              double range_ahead_right = 99999;
+              
+              // find vehicles in the adjacent lanes (0, 2)
+              for (int i = 0; i < sensor_fusion.size(); i++){
+                // car is in in lane 0 (left)
+                float d = sensor_fusion[i][6];
+                if (d < (2+4*(lane-1)+2) && d > (2+4*(lane-1)-2)){
+                  double vx = sensor_fusion[i][3];
+                  double vy = sensor_fusion[i][4];
+                  double check_speed = sqrt(vx*vx+vy*vy);
+                  double check_car_s = sensor_fusion[i][5];
+
+                  // we project s in the next timestep
+                  check_car_s += ((double)prev_path_size * 0.02 * check_speed);
+                  
+                  // we found a nearest car ahead
+                  if ((check_car_s > car_s) && (check_car_s - car_s) < range_ahead_left){
+                    range_ahead_left = check_car_s - car_s;
+                  }
+                  
+                  // we found a nearest car behind
+                  if ((check_car_s < car_s) && (car_s - check_car_s) < range_behind_left){
+                    range_behind_left = car_s - check_car_s;
+                  }
+                }
+                if (d < (2+4*(lane+1)+2) && d > (2+4*(lane+1)-2)){
+                  double vx = sensor_fusion[i][3];
+                  double vy = sensor_fusion[i][4];
+                  double check_speed = sqrt(vx*vx+vy*vy);
+                  double check_car_s = sensor_fusion[i][5];
+
+                  // we project s in the next timestep
+                  check_car_s += ((double)prev_path_size * 0.02 * check_speed);
+                  
+                  // we found a nearest car ahead
+                  if ((check_car_s > car_s) && (check_car_s - car_s) < range_ahead_right){
+                    range_ahead_right = check_car_s - car_s;
+                  }
+                  
+                  // we found a nearest car behind
+                  if ((check_car_s < car_s) && (car_s - check_car_s) < range_behind_right){
+                    range_behind_right = car_s - check_car_s;
+                  }
+                }
+              }
+              // we gain more space ahead and we have plenty of room for a safe lanechange
+              // 55 m ahead, 8 m behind
+              if ((range_ahead_right > 55) && (range_behind_right > 8)){
+                lane = 2;
+              }
+              if ((range_ahead_left > 55) && (range_behind_left > 8)){
+                lane = 0;
+              }
+            }
+            
             // we are leftmost and can only go right
             if (lane == 0){
               double range_behind = 99999;
@@ -187,17 +248,15 @@ int main() {
                     lane += 1;
               }
             }
-            
-            // we are in the middle lane
-            if (lane == 1){
-              double range_behind_left = 99999;
-              double range_behind_right = 99999;
-              double range_ahead_left = 99999;
-              double range_ahead_right = 99999;
+
+            // we are rightmost and can only go left
+            if (lane == 2){
+              double range_behind = 99999;
+              double range_ahead = 99999;
               
-              // find vehicles in the adjacent lanes (0, 2)
+              // find vehicles in the adjacent lane (1)
               for (int i = 0; i < sensor_fusion.size(); i++){
-                // car is in in lane 0 (left)
+                // car is in in the adjacent lane (1)
                 float d = sensor_fusion[i][6];
                 if (d < (2+4*(lane-1)+2) && d > (2+4*(lane-1)-2)){
                   double vx = sensor_fusion[i][3];
@@ -209,20 +268,20 @@ int main() {
                   check_car_s += ((double)prev_path_size * 0.02 * check_speed);
                   
                   // we found a nearest car ahead
-                  if ((check_car_s > car_s) && (check_car_s - car_s) < range_ahead_left){
-                    range_ahead_left = check_car_s - car_s;
+                  if ((check_car_s > car_s) && (check_car_s - car_s) < range_ahead){
+                    range_ahead = check_car_s - car_s;
                   }
                   
                   // we found a nearest car behind
-                  if ((check_car_s < car_s) && (car_s - check_car_s) < range_behind_left){
-                    range_behind_left = car_s - check_car_s;
+                  if ((check_car_s < car_s) && (car_s - check_car_s) < range_behind){
+                    range_behind = car_s - check_car_s;
                   }
                 }
               }
               // we gain more space ahead and we have plenty of room for a safe lanechange
               // 55 m ahead, 8 m behind
-              if ((range_ahead_left > 55) && (range_behind_left > 8)){
-                lane = 0;
+              if ((range_ahead > 55) && (range_behind > 8)){
+                    lane -= 1;
               }
             }
           }
