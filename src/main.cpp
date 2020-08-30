@@ -54,8 +54,8 @@ int main() {
   // set starting lane (1)
   int lane = 1;
   
-  // define a starting reference velocity -> must be 0 later
-  double ref_vel = 49.5;  // mph
+  // define a starting reference velocity
+  double ref_vel = 0;  // mph
   
   h.onMessage([&ref_vel, &map_waypoints_x, &map_waypoints_y, &map_waypoints_s,
                &map_waypoints_dx, &map_waypoints_dy, &lane]
@@ -127,9 +127,18 @@ int main() {
                 // std::cout << "Collision warning, reduce speed!" << std::endl;
                 // reduce speed -> logic needed
                 // can also check to change lanes here
-                ref_vel = 29.5;  // mph
-                // too_close = true;
+                // ref_vel = 29.5;  // mph
+                too_close = true;
               }
+            }
+          }
+          
+          if (too_close){
+            ref_vel -= 0.224;  // ~5 m/s2
+          }
+          else{
+            if (ref_vel < 49.5){
+              ref_vel += 0.224;  // ~5 m/s2
             }
           }
           
