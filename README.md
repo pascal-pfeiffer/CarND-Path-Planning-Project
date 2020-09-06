@@ -1,3 +1,7 @@
+The writeup for my solution can be found [here](WRITEUP.md).
+The following is the original README.md
+
+
 # CarND-Path-Planning-Project
 Self-Driving Car Engineer Nanodegree Program
    
