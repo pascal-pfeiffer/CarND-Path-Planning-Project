@@ -156,7 +156,7 @@ int main() {
           }
           else{
             if (ref_vel < 49.5){
-              ref_vel += 0.75;
+              ref_vel += 0.50;
             }
           }
           
