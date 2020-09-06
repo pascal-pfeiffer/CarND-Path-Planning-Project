@@ -109,7 +109,12 @@ int main() {
           bool check_for_lanechange = false;
           // bool lane_change_left_possible = false;
           // bool lane_change_right_possible = false;
+          double speed_ahead = 99;
+          // double cost_lane0 = 99999;
+          // double cost_lane1 = 99999;
+          // double cost_lane2 = 99999;
           
+          // This is the emergency slow down if a vehicle in front of us is coming to close
           // find a reference velocity to use (car in front)
           for (int i = 0; i < sensor_fusion.size(); i++){
             // car is in my lane
@@ -128,25 +133,30 @@ int main() {
               // is the gap less than 50 m, we should look for alternatives
               if ((check_car_s > car_s) && ((check_car_s - car_s) < 50)){
                 // check for possible lane changes
-                std::cout << "check for possible lane changes" << std::endl;
+                // std::cout << "check for possible lane changes" << std::endl;
                 check_for_lanechange = true;
                 
                 // if nothing else works and we are already close to the front vehicle
                 // set flag for us being to close and to slow down
-                if ((check_car_s > car_s) && ((check_car_s - car_s) < 30)){
+                if ((check_car_s > car_s) && ((check_car_s - car_s) < 20)){
                   // std::cout << "Collision warning, reduce speed!" << std::endl;
                   too_close = true;
+                  // std::cout << "Speed ahead" << check_speed << std::endl;
+                  if (check_speed < speed_ahead){
+                    speed_ahead = check_speed;
+                  }
                 }
               }
             }
           }
           
-          if (too_close){
-            ref_vel -= 0.5;
+          // too close and slower than our ref_vel (in m/s)
+          if (too_close and (speed_ahead < (ref_vel/2.24))){
+            ref_vel -= 1.00;
           }
           else{
             if (ref_vel < 49.5){
-              ref_vel += 0.5;
+              ref_vel += 0.75;
             }
           }
           
@@ -336,9 +346,9 @@ int main() {
           // std::cout << pts_x.size() << ", " << pts_y.size() << std::endl;
           
           // get 30 m spaced frenet coordinates ahead of current ego state
-          vector<double> next_wp0 = getXY(car_s + 30, (2+(4*lane)), map_waypoints_s, map_waypoints_x, map_waypoints_y);
-          vector<double> next_wp1 = getXY(car_s + 60, (2+(4*lane)), map_waypoints_s, map_waypoints_x, map_waypoints_y);
-          vector<double> next_wp2 = getXY(car_s + 90, (2+(4*lane)), map_waypoints_s, map_waypoints_x, map_waypoints_y);
+          vector<double> next_wp0 = getXY(car_s + 40, (2+(4*lane)), map_waypoints_s, map_waypoints_x, map_waypoints_y);
+          vector<double> next_wp1 = getXY(car_s + 80, (2+(4*lane)), map_waypoints_s, map_waypoints_x, map_waypoints_y);
+          vector<double> next_wp2 = getXY(car_s + 120, (2+(4*lane)), map_waypoints_s, map_waypoints_x, map_waypoints_y);
           
           // std::cout << "WP0: " << next_wp0[0] << ", " << next_wp0[1] << std::endl;
           // std::cout << "WP1: " << next_wp1[0] << ", " << next_wp1[1] << std::endl;
