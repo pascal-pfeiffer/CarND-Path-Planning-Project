@@ -345,7 +345,7 @@ int main() {
           
           // std::cout << pts_x.size() << ", " << pts_y.size() << std::endl;
           
-          // get 30 m spaced frenet coordinates ahead of current ego state
+          // get 40 m spaced frenet coordinates ahead of current ego state
           vector<double> next_wp0 = getXY(car_s + 40, (2+(4*lane)), map_waypoints_s, map_waypoints_x, map_waypoints_y);
           vector<double> next_wp1 = getXY(car_s + 80, (2+(4*lane)), map_waypoints_s, map_waypoints_x, map_waypoints_y);
           vector<double> next_wp2 = getXY(car_s + 120, (2+(4*lane)), map_waypoints_s, map_waypoints_x, map_waypoints_y);
