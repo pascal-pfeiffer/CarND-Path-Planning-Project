@@ -223,8 +223,8 @@ int main() {
               }
             }
             
-            // we are leftmost and can only go right
-            if (lane == 0){
+            // we are leftmost or rightmost and can only go to mid
+            if ((lane == 0) or (lane == 2)){
               double range_behind = 99999;
               double range_ahead = 99999;
               
@@ -255,43 +255,7 @@ int main() {
               // we gain more space ahead and we have plenty of room for a safe lanechange
               // 55 m ahead, 8 m behind
               if ((range_ahead > 55) && (range_behind > 8)){
-                    lane += 1;
-              }
-            }
-
-            // we are rightmost and can only go left
-            if (lane == 2){
-              double range_behind = 99999;
-              double range_ahead = 99999;
-              
-              // find vehicles in the adjacent lane (1)
-              for (int i = 0; i < sensor_fusion.size(); i++){
-                // car is in in the adjacent lane (1)
-                float d = sensor_fusion[i][6];
-                if (d < (2+4*(lane-1)+2) && d > (2+4*(lane-1)-2)){
-                  double vx = sensor_fusion[i][3];
-                  double vy = sensor_fusion[i][4];
-                  double check_speed = sqrt(vx*vx+vy*vy);
-                  double check_car_s = sensor_fusion[i][5];
-
-                  // we project s in the next timestep
-                  check_car_s += ((double)prev_path_size * 0.02 * check_speed);
-                  
-                  // we found a nearest car ahead
-                  if ((check_car_s > car_s) && (check_car_s - car_s) < range_ahead){
-                    range_ahead = check_car_s - car_s;
-                  }
-                  
-                  // we found a nearest car behind
-                  if ((check_car_s < car_s) && (car_s - check_car_s) < range_behind){
-                    range_behind = car_s - check_car_s;
-                  }
-                }
-              }
-              // we gain more space ahead and we have plenty of room for a safe lanechange
-              // 55 m ahead, 8 m behind
-              if ((range_ahead > 55) && (range_behind > 8)){
-                    lane -= 1;
+                    lane = 1;
               }
             }
           }
